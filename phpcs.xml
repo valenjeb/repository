@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<ruleset
+        name="Devly Repository Coding Standard"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd"
+>
+    <arg name="basepath" value="."/>
+    <arg name="extensions" value="php"/>
+    <arg name="colors" />
+
+    <!-- Show progress of the run -->
+    <arg value="p"/>
+
+    <!--Show sniff codes in all reports -->
+    <arg value="s"/>
+
+    <file>./src</file>
+    <file>./tests/</file>
+
+    <rule ref="Devly"/>
+</ruleset>
