@@ -19,7 +19,7 @@
     "ext-json": "*"
   },
   "require-dev": {
-    "phpstan/phpstan": "^1.8",
+    "phpstan/phpstan": "^1.10",
     "phpunit/phpunit": "^9.5",
     "dealerdirect/phpcodesniffer-composer-installer": "^0.7.2",
     "devly/coding-standard": "^1.0"
