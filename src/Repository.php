@@ -10,6 +10,7 @@ use Countable;
 use Exception;
 use IteratorAggregate;
 use JsonSerializable;
+use stdClass;
 use Traversable;
 
 use function array_key_exists;
@@ -35,8 +36,7 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
     /** @var array<string, mixed> */
     protected array $itemsCache = [];
 
-    /** @param mixed $items */
-    public function __construct($items = [])
+    public function __construct(mixed $items = [])
     {
         if ($items instanceof Repository) {
             $items = $items->all();
@@ -48,9 +48,11 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
     /**
      * Create a new instance of Repository object
      *
-     * @param mixed $items
+     * @param array<array-key, mixed>|Repository|stdClass $items
+     *
+     * @return Repository
      */
-    public static function new($items = []): self
+    public static function new(mixed $items = []): self
     {
         return new self($items);
     }
@@ -60,7 +62,7 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
      *
      * @throws Exception
      */
-    public function createFrom(string $key): self
+    public function createFrom(string|int $key): self
     {
         if (! $this->has($key)) {
             throw new Exception(sprintf('Key "%s" does not exist.', $key));
@@ -75,10 +77,8 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
 
     /**
      * Determines whether an item exists in the repository.
-     *
-     * @param int|string $key
      */
-    public function has($key): bool
+    public function has(string|int $key): bool
     {
         if (array_key_exists($key, $this->itemsCache) || array_key_exists($key, $this->items)) {
             return true;
@@ -100,12 +100,9 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
     /**
      * Set an item on the repository.
      *
-     * @param int|string $key
-     * @param mixed      $value
-     *
-     * @return Repository
+     * @return $this
      */
-    public function set($key, $value): self
+    public function set(int|string $key, mixed $value): self
     {
         $key = (string) $key;
 
@@ -132,13 +129,8 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
 
     /**
      * Get an item from the repository.
-     *
-     * @param int|string $key
-     * @param mixed      $default
-     *
-     * @return mixed
      */
-    public function get($key, $default = null)
+    public function get(string|int $key, mixed $default = null): mixed
     {
         if (isset($this->items[$key])) {
             return $this->items[$key];
@@ -168,9 +160,9 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
     /**
      * Merge array, object or an instance of IRepository into the current Repository
      *
-     * @param Repository|array<int|string, mixed>|object $items
+     * @param Repository|array<array-key, mixed>|object $items
      */
-    public function merge($items, bool $recursive = false): self
+    public function merge(array|object $items, bool $recursive = false): self
     {
         if ($items instanceof Repository) {
             $items = $items->all();
@@ -190,9 +182,9 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
     /**
      * Merge array, object or an instance of IRepository into the current Repository recursively
      *
-     * @param Repository|array<int|string, mixed>|object $items
+     * @param Repository|array<array-key, mixed>|object $items
      */
-    public function mergeRecursive($items): self
+    public function mergeRecursive(array|object $items): self
     {
         return $this->merge($items, true);
     }
@@ -209,10 +201,8 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
 
     /**
      * Remove an item from the repository.
-     *
-     * @param int|string $key
      */
-    public function remove($key): self
+    public function remove(string|int $key): self
     {
         if (isset($this->items[$key])) {
             unset($this->items[$key]);
@@ -249,7 +239,7 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
     /**
      * Check whether key exists in a given array.
      *
-     * @param array<string, mixed> $array
+     * @param array<array-key, mixed> $array
      */
     protected function exists(array $array, string $key): bool
     {
@@ -267,7 +257,7 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
     /**
      * Count items in the repository.
      */
-    public function count(?string $key = null): int
+    public function count(string|int|null $key = null): int
     {
         $items = $key ? $this->get($key) : $this->items;
 
@@ -276,12 +266,8 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
 
     /**
      * Return the value of a given key or all the values as JSON
-     *
-     * @param  mixed $key
-     *
-     * @return string|false
      */
-    public function toJson($key = null, int $flags = 0)
+    public function toJson(string|int|null $key = null, int $flags = 0): string|false
     {
         if ($key !== null) {
             return json_encode($this->get($key), $flags);
@@ -301,7 +287,7 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
      *
      * @param int|string $offset
      */
-    public function offsetExists($offset): bool
+    public function offsetExists(mixed $offset): bool
     {
         return $this->has($offset);
     }
@@ -310,10 +296,8 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
      * Retrieve an item from the repository.
      *
      * @param int|string $offset
-     *
-     * @return mixed
      */
-    public function offsetGet($offset)
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->get($offset);
     }
@@ -322,9 +306,8 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
      * Set an item in the repository
      *
      * @param int|string|null $offset
-     * @param mixed           $value
      */
-    public function offsetSet($offset, $value): void
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         if ($offset === null) {
             $this->items[] = $value;
@@ -340,7 +323,7 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
      *
      * @param int|string $offset
      */
-    public function offsetUnset($offset): void
+    public function offsetUnset(mixed $offset): void
     {
         $this->remove($offset);
     }
@@ -359,7 +342,7 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
     /**
      * Return items for JSON serialization
      *
-     * @return array<string|int, mixed>
+     * @return array<array-key, mixed>
      */
     public function jsonSerialize(): array
     {
@@ -375,10 +358,10 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
     /**
      * Get an iterator for the stored items
      *
-     * @return ArrayIterator<string|int, mixed>
+     * @return ArrayIterator<array-key, mixed>
      */
     public function getIterator(): Traversable
     {
-        return new ArrayIterator($this->items); // @phpstan-ignore-line
+        return new ArrayIterator($this->items);
     }
 }
