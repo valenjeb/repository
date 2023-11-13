@@ -22,7 +22,7 @@ use function explode;
 use function is_array;
 use function json_encode;
 use function sprintf;
-use function strpos;
+use function str_contains;
 
 /**
  * @implements ArrayAccess<int|string, mixed>
@@ -106,7 +106,7 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
     {
         $key = (string) $key;
 
-        if (strpos($key, '.') === false) {
+        if (! str_contains($key, '.')) {
             $this->items[$key] = $value;
         }
 
@@ -140,7 +140,7 @@ class Repository implements ArrayAccess, Countable, JsonSerializable, IteratorAg
             return $this->itemsCache[$key];
         }
 
-        if (strpos($key, '.') === false) {
+        if (! str_contains($key, '.')) {
             return $default;
         }
 
