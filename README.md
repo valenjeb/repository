@@ -87,7 +87,10 @@ $repository->clear();
 Counts the number of items in the data container
 
 ```php
-$repository->clear();
+$repository->count();
+
+// Or using the count function
+count($repository);
 ```
 
 ### isEmpty()
@@ -95,10 +98,7 @@ $repository->clear();
 Checks whether the container contains data
 
 ```php
-$repository->remove('user.name');
-
-// Or as array
-unset($repository['user.name']);
+$repository->isEmpty();
 ```
 
 ### toJson()
@@ -112,6 +112,9 @@ $repository->toJson('user');
 Returns all the stored items as JSON:
 ```php
 $repository->toJson();
+
+// Same as:
+json_encode($repository);
 ```
 
 ### createFrom()
@@ -119,5 +122,38 @@ $repository->toJson();
 Create a new Repository instance from an existing item 
 
 ```php
-$repository->createFrom('user');
+$repository  = new Repository(['name' => ['first' => 'John', 'last' => 'Doe']]);
+$repository2 = $repository->createFrom('name');
+
+$repository2->all(); // ['first' => 'John', 'last' => 'Doe']
+```
+
+### merge()
+
+Merge array, object or an instance of IRepository into the current Repository
+
+```php
+$repository = new Repository(['first' => 'John', 'last' => 'Doe']);
+
+$repository->merge(new Repository(['first' => 'Johnny']));
+
+// Can also be merged with an object
+$repository->merge((object) ['first' => 'Johnny']);
+
+// Can also be merged with an object
+$repository->merge(['first' => 'Johnny']);
+
+$repository->all(); // ['first' => 'Johnny', 'last' => 'Doe']
+```
+
+### mergeRecursive()
+
+Merge array, object or an instance of IRepository into the current Repository recursively
+
+```php
+$repository = new Repository(['name' => ['first' => 'John', 'last' => 'Doe']]);
+
+$repository->mergeRecursive(['name' => ['first' => 'Johnny']]);
+
+$repository->all(); // ['name' => ['first' => 'Johnny', 'last' => 'Doe'] 
 ```
